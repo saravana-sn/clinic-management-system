@@ -1,63 +1,94 @@
 <!-- patientDashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../assets/images/logo/logo.png" />
-    <title>PatientDashboard</title>
-    <link rel="stylesheet" href="../assets/css/adminDashboard.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/patientDashboard.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link rel="icon" type="image/png" href="../assets/images/logo/logo.png" />
+    <link rel="stylesheet" href="../assets/css/adminDashboard.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <link rel="stylesheet" href="../assets/css/patientDashboard.css" />
     <script src="../js/render.js" defer></script>
     <script src="../js/util.js" defer></script>
     <script src="../js/components/header.js" defer></script>
     <script src="../js/components/footer.js" defer></script>
-    <script type="module" src="../js/components/modals.js"></script>
+    <script type="module" src="../js/components/modals.js" defer></script>
 </head>
+<body>
+<div class="container">
+    <div class="wrapper">
+        <div id="header"></div>
 
-<body onload="renderContent()">
-    <div class="container">
-        <div class="wrapper">
-            <div id="header"></div>
-            <main class="main-content">
-                <input type="text" id="searchBar" class="searchBar" placeholder="Search Bar for custom output" />
+        <main class="main-content">
+            <h2>Find a Doctor</h2>
+
+            <div class="controls">
+                <input type="text" id="searchBar" class="searchBar" placeholder="Search doctors by name or specialty" />
+
                 <div class="filter-wrapper">
                     <select class="filter-select" id="filterTime">
-                        <option value="">Sort by Time</option>
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
+                        <option value="">All Availability</option>
+                        <option value="AM">Morning (AM)</option>
+                        <option value="PM">Afternoon (PM)</option>
                     </select>
+
                     <select class="filter-select" id="filterSpecialty">
-                        <option value="">Filter by Specialty</option>
+                        <option value="">All Specialties</option>
                         <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dentist">Dentist</option>
                         <option value="Dermatologist">Dermatologist</option>
                         <option value="Neurologist">Neurologist</option>
                         <option value="Pediatrician">Pediatrician</option>
-                        <option value="Orthopedic">Orthopedic</option>
-                        <option value="Gynecologist">Gynecologist</option>
                         <option value="Psychiatrist">Psychiatrist</option>
-                        <option value="Dentist">Dentist</option>
-                        <option value="Ophthalmologist">Ophthalmologist</option>
-                        <option value="Ent">ENT Specialist</option>
-                        <option value="Urologist">Urologist</option>
-                        <option value="Oncologist">Oncologist</option>
-                        <option value="Gastroenterologist">Gastroenterologist</option>
-                        <option value="General">General Physician</option>
+                        <option value="Surgeon">Surgeon</option>
+                        <option value="General Practitioner">General Practitioner</option>
                     </select>
                 </div>
-                <div id="content"></div>
-            </main>
-            <div id="footer"></div>
-        </div>
-    </div>
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <div id="modal-body"></div>
-        </div>
-    </div>
-    <script type="module" src="../js/patientDashboard.js" defer></script>
-</body>
+            </div>
 
+            <div id="doctorsContainer" class="doctors-container">
+                <!-- Doctor cards will be dynamically rendered here -->
+            </div>
+        </main>
+
+        <div id="footer"></div>
+    </div>
+</div>
+
+<!-- Modal for appointment booking -->
+<div id="appointmentModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <div id="modal-body">
+            <h3>Book Appointment</h3>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="appointmentDate">Date:</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentTime">Time:</label>
+                    <select id="appointmentTime" required>
+                        <option value="">Select a time</option>
+                        <option value="09:00">09:00 AM</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="14:00">02:00 PM</option>
+                        <option value="15:00">03:00 PM</option>
+                        <option value="16:00">04:00 PM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reason">Reason for visit:</label>
+                    <textarea id="reason" rows="3" placeholder="Briefly describe your symptoms or reason for appointment"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Book Appointment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="../js/patientDashboard.js" defer></script>
+</body>
 </html>

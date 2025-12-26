@@ -1,5 +1,89 @@
 /* this is the style sheet file for index.htlm  */
 
+/* Reset global et configuration de base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Layout Wrapper */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Titles style */
+h2 {
+    font-size: 48px;
+    margin-bottom: 50px;
+    color: #003e3e;
+    font-weight: bold;
+    font-family: 'Alegreya', 'Roboto', sans-serif;
+    text-align: center;
+}
+
+/* Buttons style */
+button {
+    background-color: #015c5d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    width: 200px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #A62B1F;
+}
+
+/* Dashboard buttons */
+.dashboard-btn {
+    background-color: #015c5d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    width: 200px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-btn:hover {
+    background-color: #003e3e;
+}
+
+/* Main section */
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    background-image: url('../images/defineRole/index.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+/* this is the style sheet file for index.htlm  */
+
 /* 
 **Global Reset (`*`)**
 

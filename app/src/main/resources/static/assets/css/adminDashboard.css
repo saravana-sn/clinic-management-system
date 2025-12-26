@@ -1,5 +1,84 @@
 /*this is the style sheet for the adminDashboard. */
 
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base HTML & Body */
+html, body {
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* Main Layout Wrapper */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Section Heading */
+h2 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 50px;
+    color: #003e3e;
+    text-align: center;
+}
+
+/* Main Content Section */
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    background-image: url("../images/defineRole/index.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Primary Button */
+button {
+    background-color: #A62B1F;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    margin-top: 20px;
+    width: 200px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #A62B1F; /* Maintains the same color on hover */
+}
+
+/* Admin Button */
+.adminBtn {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+    width: 110px;
+    padding: 10px 0;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.adminBtn:hover {
+    color: #A62B1F;
+    background-color: #f4f4f4; /* Keep background same on hover */
+}
+/*this is the style sheet for the adminDashboard. */
+
 /* 
 Global Reset (`*`)
 

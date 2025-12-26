@@ -1,8 +1,70 @@
 <!-- index.html -->
-<!-- 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Selection</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="./assets/images/logo/logo.png" type="image/png">
+
+    <!-- CSS links -->
+    <link rel="stylesheet" href="./assets/css/index.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+    <!-- JS links with defer -->
+    <script src="./js/util.js" defer></script>
+    <script src="./js/render.js" defer></script>
+
+    <!-- Component JS links -->
+    <script src="./js/components/header.js" defer></script>
+    <script src="./js/components/footer.js" defer></script>
+</head>
+<body>
+<div class="container">
+    <div class="wrapper">
+        <!-- Header placeholder -->
+        <div id="header"></div>
+
+        <main class="main-content">
+            <h2>Select your role</h2>
+
+            <div class="role-buttons">
+                <button id="adminBtn" class="adminBtn" onclick="selectRole('admin')">
+                    Admin
+                </button>
+                <button id="doctorBtn" class="doctorBtn" onclick="selectRole('doctor')">
+                    Doctor
+                </button>
+                <button id="patientBtn" class="patientBtn" onclick="selectRole('patient')">
+                    Patient
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer placeholder -->
+        <div id="footer"></div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- Service JS -->
+<script type="module" src="./js/render.js" defer></script>
+</body>
+</html>
+<!--
 
 Step-by-Step Explanation of `index.html`.
-This file allows users to select a role (Admin, Patient, Doctor) 
+This file allows users to select a role (Admin, Patient, Doctor)
 and triggers modal-based login functionality.
 
 1. Label the File
