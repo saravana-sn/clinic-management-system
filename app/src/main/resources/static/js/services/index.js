@@ -1,3 +1,106 @@
+import { openModal } from "../components/modals.js"
+import { API_BASE_URL } from "../config/config.js";
+
+const ADMIN_API = API_BASE_URL + '/admin';
+const DOCTOR_API = API_BASE_URL + '/doctor/login'
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupEventListeners();
+});
+
+/**
+ * Sets up all event listeners
+ */
+function setupEventListeners() {
+    // Add Admin button
+    const adminBtn = document.getElementById('adminBtn');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => openModal('adminLogin'));
+    }
+    // Add Doctor button
+    const doctorBtn = document.getElementById('doctorBtn');
+    if (doctorBtn) {
+        doctorBtn.addEventListener('click', () => openModal('doctorLogin'));
+    }
+}
+
+
+window.adminLoginHandler = async function(event) {
+    event.preventDefault();
+    try {
+        const response = await authenticate({
+            username: document.getElementById('adminUsername').value,
+            password: document.getElementById('adminPassword').value
+        }, 'admin');
+        
+        handleLoginSuccess(response, 'admin');
+    } catch (error) {
+        showError('adminError', error.message);
+    }
+};
+
+window.doctorLoginHandler = async function(event) {
+    event.preventDefault();
+    try {
+        const response = await authenticate({
+            identifier: document.getElementById('doctorEmail').value,
+            password: document.getElementById('doctorPassword').value
+        }, 'doctor');
+        
+        handleLoginSuccess(response, 'doctor');
+    } catch (error) {
+        showError('doctorError', error.message);
+    }
+};
+
+async function authenticate(credentials, role) {
+    const response = await fetch(API_ENDPOINTS[role], {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': getCSRFToken()
+        },
+        body: JSON.stringify(credentials)
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Login failed');
+    }
+
+    return response;
+}
+
+function handleLoginSuccess(response, role) {
+    response.json().then(data => {
+        if (!data.token) throw new Error('No token received');
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userRole', role);
+
+        // Redirect
+        window.location.href = `/${role}/dashboard?token=${encodeURIComponent(data.token)}`;
+
+        // Immediately clear from URL after loading
+        setTimeout(() => {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 100);
+    });
+}
+
+export function showError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        errorElement.style.display = 'none';
+    }, 5000);
+}
+
 /*
   Import the openModal function to handle showing login popups/modals
   Import the base API URL from the config file
