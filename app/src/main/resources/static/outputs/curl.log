@@ -1,0 +1,33 @@
+curl -X POST http://localhost:8080/patient -H "Content-Type: application/json" -d '{"name":"saravana","email":"sarav@n.a","phone":"6767676767","password":"123456","age":23,"address":"abc","gender":"male"}'
+curl -X POST http://localhost:8080/patient/login -H "Content-Type: application/json" -d '{"identifier":"sarav@n.a","password":"123456"}'
+curl -i -X GET http://localhost:8080/patient/26/eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYXJhdkBuLmEiLCJpYXQiOjE3NjY4NTY1NTEsImV4cCI6MTc2NzQ2MTM1MX0.0Y0jOjNucwcsfgdnR_hRh6Hy6hLs9yqZnjtAX8T-cdU -H "Accept: application/json"
+curl -X GET http://localhost:8080/doctor/filter/null/09:00-10:00/Cardiologist
+
+//log
+~/Developer/Projects/java-database-capstone/app > curl -X POST http://localhost:8080/patient -H "Content-Type: application/json" -d '{"name":"saravana","email":"sarav@n.a","phone":"6767676767","password":"1234","age":23,"address":"abc","gender":"male"}'
+{"error":"Failed to save patient data: Validation failed: password: size must be between 6 and 2147483647"}
+~/Developer/Projects/java-database-capstone/app > curl -X POST http://localhost:8080/patient -H "Content-Type: application/json" -d '{"name":"saravana","email":"sarav@n.a","phone":"6767676767","password":"123456","age":23,"address":"abc","gender":"male"}'
+{"message":"Signup successful"}
+~/Developer/Projects/java-database-capstone/app > curl -X POST http://localhost:8080/patient -H "Content-Type: application/json" -d '{"name":"saravana","email":"sarav@n.a","phone":"6767676767","password":"123456","age":23,"address":"abc","gender":"male"}'
+{"error":"Failed to save patient data: Failed to save patient: Patient with this email already exists"}
+~/Developer/Projects/java-database-capstone/app > curl -X POST http://localhost:8080/patient/login -H "Content-Type: application/json" -d '{"email":"sarav@n.a","password":"123456"}'
+{"error":"Invalid credentials"}
+~/Developer/Projects/java-database-capstone/app > curl -X POST http://localhost:8080/patient/login -H "Content-Type: application/json" -d '{"identifier":"sarav@n.a","password":"123456"}'
+{"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYXJhdkBuLmEiLCJpYXQiOjE3NjY4NTYxMjgsImV4cCI6MTc2NzQ2MDkyOH0.f7Xr2v3V1nnoL68RxH5cW2aT4uoU7jcAEsvBD06Lu-w"}
+~/Developer/Projects/java-database-capstone/app >
+~/Developer/Projects/java-database-capstone/app > curl -X POST http://localhost:8080/patient/login -H "Content-Type: application/json" -d '{"identifier":"sarav@n.a","password":"123456"}'
+{"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYXJhdkBuLmEiLCJpYXQiOjE3NjY4NTY1NTEsImV4cCI6MTc2NzQ2MTM1MX0.0Y0jOjNucwcsfgdnR_hRh6Hy6hLs9yqZnjtAX8T-cdU"}
+~/Developer/Projects/java-database-capstone/app > curl -i -X GET http://localhost:8080/patient/26/eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYXJhdkBuLmEiLCJpYXQiOjE3NjY4NTY1NTEsImV4cCI6MTc2NzQ2MTM1MX0.0Y0jOjNucwcsfgdnR_hRh6Hy6hLs9yqZnjtAX8T-cdU -H "Accept: application/json"
+
+HTTP/1.1 200
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+Content-Disposition: inline;filename=f.txt
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Sat, 27 Dec 2025 17:29:47 GMT
+
+{"appointments":[]}
+~/Developer/Projects/java-database-capstone/app > curl -X GET http://localhost:8080/doctor/filter/null/09:00-10:00/Cardiologist
+{"doctors":[]}
