@@ -14,8 +14,8 @@ import { showError } from '../js/services/index.js';
 // DOM Elements
 const contentDiv = document.getElementById('content');
 const searchBar = document.getElementById('searchBar');
-const filterTime = document.getElementById('filterTime');
-const filterSpecialty = document.getElementById('filterSpecialty');
+const timeFilter = document.getElementById('timeFilter');
+const specialtyFilter = document.getElementById('specialtyFilter');
 const addDoctorBtn = document.getElementById('addDocBtn');
 
 // Initialize dashboard when DOM is loaded
@@ -37,11 +37,11 @@ function setupEventListeners() {
     if (searchBar) {
         searchBar.addEventListener('input', filterDoctorsOnChange);
     }
-    if (filterTime) {
-        filterTime.addEventListener('change', filterDoctorsOnChange);
+    if (timeFilter) {
+        timeFilter.addEventListener('change', filterDoctorsOnChange);
     }
-    if (filterSpecialty) {
-        filterSpecialty.addEventListener('change', filterDoctorsOnChange);
+    if (specialtyFilter) {
+        specialtyFilter.addEventListener('change', filterDoctorsOnChange);
     }
 }
 
@@ -64,10 +64,13 @@ async function loadDoctorCards() {
 async function filterDoctorsOnChange() {
     try {
         const name = searchBar.value.trim() || null;
-        const time = filterTime.value || null;
-        const specialty = filterSpecialty.value || null;
+        const time = timeFilter.value || null;
+        const specialty = specialtyFilter.value || null;
+        console.log('Filtering with:', { name, time, specialty });
 
         const filteredDoctors = await filterDoctors(name, time, specialty);
+        console.log('Data received from Spring:', filteredDoctors);
+        console.log()
         renderDoctorCards(filteredDoctors);
     } catch (error) {
         console.error('Filter error:', error);

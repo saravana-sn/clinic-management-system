@@ -2,8 +2,11 @@ package com.project.back_end.repo;
 
 import com.project.back_end.models.Patient;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-public interface PatientRepository extends JpaRepository<Patient,String> {
+@Repository
+public interface PatientRepository extends JpaRepository<Patient,Long> {
     boolean existsByEmail(String email);
     // 1. Extend JpaRepository:
 //    - The repository extends JpaRepository<Patient, Long>, which provides basic CRUD functionality.
@@ -18,11 +21,14 @@ public interface PatientRepository extends JpaRepository<Patient,String> {
 //      - This method retrieves a Patient by their email address.
 //      - Return type: Patient
 //      - Parameters: String email
+    public Patient findByEmail(String email);
 
 //    - **findByEmailOrPhone**:
 //      - This method retrieves a Patient by either their email or phone number, allowing flexibility for the search.
 //      - Return type: Patient
 //      - Parameters: String email, String phone
+    @Query("SELECT p FROM Patient p WHERE p.email = :email OR p.phone = :phone")
+    public Patient findByEmailOrPhone(String email, String phone);
 
 // 3. @Repository annotation:
 //    - The @Repository annotation marks this interface as a Spring Data JPA repository.

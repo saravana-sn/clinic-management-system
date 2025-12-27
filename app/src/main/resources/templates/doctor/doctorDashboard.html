@@ -9,12 +9,12 @@
     <link rel="stylesheet" th:href="@{/assets/css/adminDashboard.css}">
     <link rel="stylesheet" th:href="@{/assets/css/doctorDashboard.css}">
     <link rel="stylesheet" th:href="@{/assets/css/style.css}">
-    <script th:src="@{/js/render.js}" defer></script>
+    <script type="module" th:src="@{/js/render.js}" defer></script>
     <script th:src="@{/js/util.js}" defer></script>
     <script th:src="@{/js/components/header.js}" defer></script>
     <script th:src="@{/js/components/footer.js}" defer></script>
 </head>
-<body onload="renderContent()">
+<body>
 <div class="container">
     <div class="wrapper">
         <div id="header"></div>
@@ -39,8 +39,7 @@
                         <th>Name</th>
                         <th>Phone No.</th>
                         <th>Email</th>
-                        <th>Appointment Time</th>
-                        <th>Actions</th>
+                        <th>Prescription</th>
                     </tr>
                     </thead>
                     <tbody id="patientTableBody">
@@ -54,7 +53,7 @@
     </div>
 </div>
 
-<script type="module" th:src="@{/js/services/doctorDashboard.js}" defer></script>
+<script type="module" th:src="@{/js/doctorDashboard.js}" defer></script>
 </body>
 </html>
 <!-- doctorDashboard.html -->

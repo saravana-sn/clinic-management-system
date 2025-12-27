@@ -37,9 +37,50 @@ export async function patientLogin(data) {
     },
     body: JSON.stringify(data)
   });
-
-
 }
+
+window.patientLoginHandler = async function (event) {
+    if (event) event.preventDefault();
+
+    try {
+        // Step 1: Get values from input fields
+        const identifier = document.getElementById('patientEmail').value;
+        const password = document.getElementById('patientPassword').value;
+       console.log("patient", identifier)
+
+        // Step 2: Create patient object
+        const patient = { identifier, password };
+        console.log("password", password)
+
+
+        // Step 3: Send POST request
+        const response = await fetch(`${PATIENT_API}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(patient)
+        });
+
+        // Step 4: Handle success
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userRole', 'loggedPatient');
+
+            if (typeof selectRole === 'function') {
+                selectRole('loggedPatient');
+            }
+        } else {
+            // Step 5: Handle failure
+            alert("Invalid credentials!");
+        }
+    } catch (error) {
+        // Step 6: Graceful error handling
+        console.error("Patient Login Error:", error);
+        alert("A server error occurred.");
+    }
+};
 
 // For getting patient data (name ,id , etc ). Used in booking appointments
 export async function getPatientData(token) {
@@ -55,9 +96,9 @@ export async function getPatientData(token) {
 }
 
 // the Backend API for fetching the patient record(visible in Doctor Dashboard) and Appointments (visible in Patient Dashboard) are same based on user(patient/doctor).
-export async function getPatientAppointments(id, token, user) {
+export async function getPatientAppointments(id, token) {
   try {
-    const response = await fetch(`${PATIENT_API}/${id}/${user}/${token}`);
+    const response = await fetch(`${PATIENT_API}/${id}/${token}`);
     const data = await response.json();
     console.log(data.appointments)
     if (response.ok) {
@@ -82,6 +123,7 @@ export async function filterAppointments(condition, name, token) {
 
     if (response.ok) {
       const data = await response.json();
+       console.log(data)
       return data;
 
     } else {

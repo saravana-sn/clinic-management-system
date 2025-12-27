@@ -1,23 +1,30 @@
 // render.js
 
+// Add this import at the top of render.js
+import { openModal } from "./components/modals.js";
+
 function selectRole(role) {
-  setRole(role);
   const token = localStorage.getItem('token');
+
+  // If we don't have a token, we MUST show the login modal
+  if (!token) {
+    if (role === 'admin') openModal('adminLogin');
+    if (role === 'doctor') openModal('doctorLogin');
+    if (role === 'patient'){
+        localStorage.setItem('userRole', 'patient')
+        window.location.href = "./pages/patientDashboard.html";
+    }
+    return;
+  }
+
   if (role === "admin") {
-    if (token) {
       window.location.href = `/adminDashboard/${token}`;
-    }
-  } if (role === "patient") {
-    window.location.href = "/pages/patientDashboard.html";
-  } else if (role === "doctor") {
-    if (token) {
-      window.location.href = `/doctorDashboard/${token}`;
-    } else if (role === "loggedPatient") {
+  } else if (role === "loggedPatient") {
       window.location.href = "loggedPatientDashboard.html";
-    }
+  } else if (role === "doctor") {
+      window.location.href = `/doctorDashboard/${token}`;
   }
 }
-
 
 function renderContent() {
   const role = getRole();
@@ -26,3 +33,5 @@ function renderContent() {
     return;
   }
 }
+
+window.selectRole = selectRole;

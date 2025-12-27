@@ -48,20 +48,20 @@ public class TokenService {
     }
 
     // 4. generateToken Method
-    public String generateToken(String email) {
+    public String generateToken(String identifier) {
         long now = System.currentTimeMillis();
         long expirationTime = now + (7L * 24 * 60 * 60 * 1000); // 7 days in milliseconds
 
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(identifier)
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // 5. extractEmail Method
-    public String extractEmail(String token) {
+    // 5. extractIdentifier Method
+    public String extractIdentifier(String token) {
         Claims claims = Jwts.parser()             // Changed from parserBuilder()
                 .verifyWith(getSigningKey())     // Changed from setSigningKey()
                 .build()
@@ -73,13 +73,13 @@ public class TokenService {
     // 6. validateToken Method
     public boolean validateToken(String token, String role) {
         try {
-            String email = extractEmail(token);
+            String identifier = extractIdentifier(token);
 
             // Check existence based on role
             return switch (role.toLowerCase()) {
-                case "admin" -> adminRepository.existsByEmail(email);
-                case "doctor" -> doctorRepository.existsByEmail(email);
-                case "patient", "loggedpatient" -> patientRepository.existsByEmail(email);
+                case "admin" -> adminRepository.existsByUsername(identifier);
+                case "doctor" -> doctorRepository.existsByEmail(identifier);
+                case "patient", "loggedPatient" -> patientRepository.existsByEmail(identifier);
                 default -> false;
             };
         } catch (Exception e) {

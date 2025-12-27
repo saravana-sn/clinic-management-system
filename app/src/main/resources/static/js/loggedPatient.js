@@ -105,19 +105,21 @@ function filterDoctorsOnChange() {
 
   filterDoctors(name, time, specialty)
     .then(response => {
-      const doctors = response.doctors;
-      const contentDiv = document.getElementById("content");
-      contentDiv.innerHTML = "";
+        // If response IS the array, use it. If it's an object with a doctors property, use that.
+        const doctors = Array.isArray(response) ? response : (response.doctors || []);
 
-      if (doctors.length > 0) {
-        console.log(doctors);
-        doctors.forEach(doctor => {
-          const card = createDoctorCard(doctor);
-          contentDiv.appendChild(card);
-        });
-      } else {
+        const contentDiv = document.getElementById("content");
+        contentDiv.innerHTML = "";
+
+        if (doctors && doctors.length > 0) {
+          console.log("Doctors found:", doctors);
+          doctors.forEach(doctor => {
+            const card = createDoctorCard(doctor);
+            contentDiv.appendChild(card);
+          });
+        } else {
         contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
-        console.log("Nothing");
+        console.log("No doctors returned from server.");
       }
     })
     .catch(error => {

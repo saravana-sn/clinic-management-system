@@ -5,7 +5,7 @@ export function openModal(type) {
     modalContent = `
          <h2>Add Doctor</h2>
          <input type="text" id="doctorName" placeholder="Doctor Name" class="input-field">
-         <select id="specialization" class="input-field select-dropdown">
+         <select id="doctorSpecialty" class="input-field select-dropdown">
              <option value="">Specialization</option>
                         <option value="cardiologist">Cardiologist</option>
                         <option value="dermatologist">Dermatologist</option>
@@ -40,9 +40,12 @@ export function openModal(type) {
   } else if (type === 'patientLogin') {
     modalContent = `
         <h2>Patient Login</h2>
-        <input type="text" id="email" placeholder="Email" class="input-field">
-        <input type="password" id="password" placeholder="Password" class="input-field">
+        <form onsubmit="patientLoginHandler(event)">
+        <input type="text" id="patientEmail" placeholder="Email" class="input-field">
+        <input type="password" id="patientPassword" placeholder="Password" class="input-field">
         <button class="dashboard-btn" id="loginBtn">Login</button>
+        </form>
+        <div class="error-message" id="patientError"></div>
       `;
   }
   else if (type === "patientSignup") {
@@ -59,16 +62,22 @@ export function openModal(type) {
   } else if (type === 'adminLogin') {
     modalContent = `
         <h2>Admin Login</h2>
-        <input type="text" id="username" name="username" placeholder="Username" class="input-field">
-        <input type="password" id="password" name="password" placeholder="Password" class="input-field">
-        <button class="dashboard-btn" id="adminLoginBtn" >Login</button>
+        <form onsubmit="adminLoginHandler(event)">
+        <input type="text" id="adminUsername" name="adminUsername" placeholder="Username" class="input-field" required>
+        <input type="password" id="adminPassword" name="password" placeholder="Password" class="input-field" required>
+        <button type="submit" class="dashboard-btn">Login</button>
+        </form>
+        <div class="error-message" id="adminError"></div>
       `;
   } else if (type === 'doctorLogin') {
     modalContent = `
         <h2>Doctor Login</h2>
-        <input type="text" id="email" placeholder="Email" class="input-field">
-        <input type="password" id="password" placeholder="Password" class="input-field">
-        <button class="dashboard-btn" id="doctorLoginBtn" >Login</button>
+        <form onsubmit="doctorLoginHandler(event)">
+        <input type="email" id="doctorEmail" class="input-field" placeholder="Email" required>
+        <input type="password" id="doctorPassword" class="input-field" placeholder="Password" required>
+        <button type="submit" class="dashboard-btn">Login</button>
+        </form>
+        <div class="error-message" id="doctorError"></div>
       `;
   }
 
@@ -84,18 +93,24 @@ export function openModal(type) {
   }
 
   if (type === "patientLogin") {
-    document.getElementById("loginBtn").addEventListener("click", loginPatient);
+    document.getElementById("loginBtn").addEventListener("click", patientLogin);
   }
 
   if (type === 'addDoctor') {
     document.getElementById('saveDoctorBtn').addEventListener('click', adminAddDoctor);
   }
+}
 
-  if (type === 'adminLogin') {
-    document.getElementById('adminLoginBtn').addEventListener('click', adminLoginHandler);
-  }
+window.openModal = openModal;
 
-  if (type === 'doctorLogin') {
-    document.getElementById('doctorLoginBtn').addEventListener('click', doctorLoginHandler);
-  }
+export function closeModal(type) {
+    const modal = document.getElementById('modal');
+
+    // Hide the modal
+    modal.style.display = 'none';
+
+    // Optional: Clear the modal content if needed
+    if (type === 'addDoctor') {
+      document.getElementById('modal-body').innerHTML = '';
+    }
 }

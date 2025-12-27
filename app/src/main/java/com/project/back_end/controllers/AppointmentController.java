@@ -1,7 +1,155 @@
 package com.project.back_end.controllers;
 
 
+import com.project.back_end.models.Appointment;
+import com.project.back_end.services.AppointmentService;
+import com.project.back_end.services.Service;
+import jakarta.persistence.RollbackException;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/appointments")
 public class AppointmentController {
+
+    private final AppointmentService appointmentService;
+    private final Service service;
+
+    public AppointmentController(AppointmentService appointmentService,
+                                 Service service) {
+        this.appointmentService = appointmentService;
+        this.service = service;
+    }
+
+    @GetMapping("/{date}/{patientName}/{token}")
+    public ResponseEntity<Map<String, Object>> getAppointments(
+            @PathVariable LocalDate date,
+            @PathVariable String patientName,
+            @PathVariable String token) {
+
+        ResponseEntity<Map<String, String>> validationResponse = service.validateToken(token, "doctor");
+
+        if (validationResponse.getStatusCode().isError()) {
+            return ResponseEntity.status(validationResponse.getStatusCode())
+                    .body(Map.of("error", "Invalid or expired token"));
+        }
+
+        return ResponseEntity.ok(appointmentService.getAppointment(patientName, date, token));
+    }
+
+    @PostMapping("/{token}")
+    public ResponseEntity<Map<String, String>> bookAppointment(
+            @RequestBody Appointment appointment,
+            @PathVariable String token) {
+
+        ResponseEntity<Map<String, String>> validationResponse = service.validateToken(token, "patient");
+
+        if (validationResponse.getStatusCode().isError()) {
+            return validationResponse;
+        }
+
+        int validationResult = service.validateAppointment(appointment);
+        if (validationResult == -1) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Doctor not found"));
+        } else if (validationResult == 0) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Time slot not available"));
+        }
+
+        int result = appointmentService.bookAppointment(appointment);
+        if (result == 1) {
+            return ResponseEntity.status(201)
+                    .body(Map.of("message", "Appointment booked successfully"));
+        } else {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Failed to book appointment"));
+        }
+    }
+
+    @PutMapping("/{token}")
+    public ResponseEntity<Map<String, String>> updateAppointment(
+            @RequestBody Appointment appointment,
+            @PathVariable String token) {
+
+        ResponseEntity<Map<String, String>> validationResponse = service.validateToken(token, "patient");
+        if (validationResponse.getStatusCode().isError()) {
+            return validationResponse;
+        }
+
+        try {
+            ResponseEntity<Map<String, String>> updateResult = appointmentService.updateAppointment(appointment);
+            return updateResult;
+        } catch (Exception e) {
+            return handleUpdateException(e);
+        }
+    }
+
+    private ResponseEntity<Map<String, String>> handleUpdateException(Exception e) {
+        // Handle ConstraintViolationException (direct or wrapped)
+        ConstraintViolationException constraintViolation = extractConstraintViolation(e);
+        if (constraintViolation != null) {
+            String errorMessage = constraintViolation.getConstraintViolations().stream()
+                    .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                    .collect(Collectors.joining(", "));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Validation failed: " + errorMessage));
+        }
+
+        // Handle other specific exceptions
+        if (e instanceof ValidationException) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Validation failed: " + e.getMessage()));
+        }
+
+        // Generic error handling
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", "Failed to update appointment: " + e.getMessage()));
+    }
+
+    private ConstraintViolationException extractConstraintViolation(Throwable e) {
+        // Check if exception is directly a ConstraintViolationException
+        if (e instanceof ConstraintViolationException) {
+            return (ConstraintViolationException) e;
+        }
+
+        // Check if exception is wrapped in TransactionSystemException
+        if (e instanceof TransactionSystemException) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RollbackException && cause.getCause() instanceof ConstraintViolationException) {
+                return (ConstraintViolationException) cause.getCause();
+            }
+        }
+
+        // Check nested causes
+        Throwable cause = e.getCause();
+        if (cause != null && cause != e) {
+            return extractConstraintViolation(cause);
+        }
+
+        return null;
+    }
+
+    @DeleteMapping("/{id}/{token}")
+    public ResponseEntity<Map<String, String>> cancelAppointment(
+            @PathVariable Long id,
+            @PathVariable String token) {
+
+        ResponseEntity<Map<String, String>> validationResponse = service.validateToken(token, "patient");
+
+        if (validationResponse.getStatusCode().isError()) {
+            return validationResponse;
+        }
+
+        return appointmentService.cancelAppointment(id, token);
+    }
 
 // 1. Set Up the Controller Class:
 //    - Annotate the class with `@RestController` to define it as a REST API controller.

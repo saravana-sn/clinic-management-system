@@ -1,5 +1,4 @@
 // header.js
-
 /**
  * Renders the header section based on user role and session status
  */
@@ -24,6 +23,8 @@ function renderHeader() {
     // Retrieve user role and token from localStorage
     const role = localStorage.getItem("userRole");
     const token = localStorage.getItem("token");
+    console.log("role:", role)
+    console.log("token:", token)
 
     // Handle session expiry or invalid login
     if ((role === "loggedPatient" || role === "admin" || role === "doctor") && !token) {
@@ -125,6 +126,7 @@ function logoutPatient() {
 
 // Render the header when the page loads
 document.addEventListener("DOMContentLoaded", renderHeader);
+window.logout = logout;
 /*
   Step-by-Step Explanation of Header Section Rendering
 

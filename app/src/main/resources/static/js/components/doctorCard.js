@@ -1,159 +1,262 @@
-// doctorCard.js
+/**
+ * Doctor Card Component
+ * Creates a dynamic card displaying doctor information with role-specific actions
+ *
+ * Dependencies:
+ * - deleteDoctor() from '/js/services/doctorServices.js'
+ * - getPatientData() from '/js/services/patientServices.js'
+ * - showBookingOverlay() from '/js/loggedPatient.js' (NO)
+ */
 
-// Import necessary functions
-import { deleteDoctor } from '../services/doctorServices.js';
-import { getPatientData } from '../services/patientServices.js';
-import { showBookingOverlay } from './loggedPatient.js';
+import { deleteDoctor } from '/js/services/doctorServices.js';
+import { getPatientData } from '/js/services/patientServices.js';
+// import { showBookingOverlay } from '/js/loggedPatient.js';
+import { bookAppointment } from '/js/services/appointmentRecordService.js';
 
 /**
- * Function to create and return a DOM element for a single doctor card
- * @param {Object} doctor - Doctor object containing information
- * @returns {HTMLElement} Doctor card element
+ * Creates and returns a doctor card element with role-specific functionality
+ * @param {Object} doctor - Doctor object containing:
+ *   @property {string} id - Doctor's unique ID
+ *   @property {string} name - Doctor's full name
+ *   @property {string} specialty - Medical specialty
+ *   @property {string} email - Contact email
+ *   @property {string[]} availableTimes - Array of available time slots
+ * @returns {HTMLElement} Fully constructed doctor card element
  */
 export function createDoctorCard(doctor) {
-    // Create the main container for the doctor card
-    const card = document.createElement("div");
-    card.classList.add("doctor-card");
-
-    // Retrieve the current user role from localStorage
-    const role = localStorage.getItem("userRole");
-    const token = localStorage.getItem("token");
-
-    // Create a div to hold doctor information
-    const infoDiv = document.createElement("div");
-    infoDiv.classList.add("doctor-info");
-
-    // Create and set the doctor's name
-    const name = document.createElement("h3");
-    name.textContent = doctor.name || "Doctor Name";
-    name.classList.add("doctor-name");
-
-    // Create and set the doctor's specialization
-    const specialization = document.createElement("p");
-    specialization.textContent = `Specialty: ${doctor.specialty || "Not specified"}`;
-    specialization.classList.add("doctor-specialty");
-
-    // Create and set the doctor's email
-    const email = document.createElement("p");
-    email.textContent = `Email: ${doctor.email || "No email available"}`;
-    email.classList.add("doctor-email");
-
-    // Create and list available appointment times
-    const availability = document.createElement("p");
-    availability.textContent = `Available: ${doctor.availability ? doctor.availability.join(", ") : "Not specified"}`;
-    availability.classList.add("doctor-availability");
-
-    // Append all info elements to the doctor info container
-    infoDiv.appendChild(name);
-    infoDiv.appendChild(specialization);
-    infoDiv.appendChild(email);
-    infoDiv.appendChild(availability);
-
-    // Create a container for card action buttons
-    const actionsDiv = document.createElement("div");
-    actionsDiv.classList.add("card-actions");
-
-    // === ADMIN ROLE ACTIONS ===
-    if (role === "admin") {
-        // Create a delete button
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.classList.add("delete-btn");
-
-        // Add click handler for delete button
-        deleteBtn.addEventListener("click", async () => {
-            // Get the admin token from localStorage
-            const adminToken = localStorage.getItem("token");
-
-            if (!adminToken) {
-                alert("Admin authentication required. Please log in again.");
-                return;
-            }
-
-            // Confirm deletion
-            const isConfirmed = confirm(`Are you sure you want to delete Dr. ${doctor.name}?`);
-
-            if (isConfirmed) {
-                try {
-                    // Call API to delete the doctor
-                    const result = await deleteDoctor(doctor.id, adminToken);
-
-                    // Show result and remove card if successful
-                    if (result.success) {
-                        alert(`Doctor ${doctor.name} has been deleted successfully.`);
-                        card.remove();
-                    } else {
-                        alert(`Failed to delete doctor: ${result.message}`);
-                    }
-                } catch (error) {
-                    console.error("Error deleting doctor:", error);
-                    alert("An error occurred while deleting the doctor.");
-                }
-            }
-        });
-
-        // Add delete button to actions container
-        actionsDiv.appendChild(deleteBtn);
+    // Validate doctor object
+    if (!doctor || typeof doctor !== 'object') {
+        console.error('Invalid doctor data provided');
+        return document.createElement('div'); // Return empty div as fallback
     }
 
-    // === PATIENT (NOT LOGGED-IN) ROLE ACTIONS ===
-    else if (role === "patient") {
-        // Create a book now button
-        const bookBtn = document.createElement("button");
-        bookBtn.textContent = "Book Now";
-        bookBtn.classList.add("book-btn");
+    // Create card container
+    const card = document.createElement('div');
+    card.className = 'doctor-card';
+    card.dataset.doctorId = doctor.id;
 
-        // Alert patient to log in before booking
-        bookBtn.addEventListener("click", () => {
-            alert("Please log in to book an appointment.");
-            // Optionally redirect to login page or open login modal
-            window.location.href = "/pages/patientDashboard.html";
-        });
+    // Get current user role
+    const role = localStorage.getItem('userRole') || 'guest';
 
-        // Add button to actions container
-        actionsDiv.appendChild(bookBtn);
-    }
+    // Create information section
+    const infoSection = createInfoSection(doctor);
 
-    // === LOGGED-IN PATIENT ROLE ACTIONS ===
-    else if (role === "loggedPatient") {
-        // Create a book now button
-        const bookBtn = document.createElement("button");
-        bookBtn.textContent = "Book Now";
-        bookBtn.classList.add("book-btn");
+    // Create actions section based on role
+    const actionsSection = createActionsSection(doctor, role);
 
-        // Handle booking logic for logged-in patient
-        bookBtn.addEventListener("click", async (e) => {
-            // Redirect if token not available
-            if (!token) {
-                alert("Session expired. Please log in again.");
-                localStorage.removeItem("userRole");
-                window.location.href = "/pages/patientDashboard.html";
-                return;
-            }
-
-            try {
-                // Fetch patient data with token
-                const patientData = await getPatientData(token);
-
-                // Show booking overlay UI with doctor and patient info
-                showBookingOverlay(e, doctor, patientData);
-            } catch (error) {
-                console.error("Error fetching patient data:", error);
-                alert("Failed to load patient information. Please try again.");
-            }
-        });
-
-        // Add button to actions container
-        actionsDiv.appendChild(bookBtn);
-    }
-
-    // Append doctor info and action buttons to the card
-    card.appendChild(infoDiv);
-    card.appendChild(actionsDiv);
-
-    // Return the complete doctor card element
+    // Assemble card
+    card.append(infoSection, actionsSection);
     return card;
 }
+
+/**
+ * Creates the information section of the doctor card
+ * @param {Object} doctor - Doctor data
+ * @returns {HTMLElement} Information section element
+ */
+function createInfoSection(doctor) {
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'doctor-info';
+
+    const elements = [
+        createElement('h3', 'doctor-name', doctor.name),
+        createElement('p', 'doctor-specialty', `Specialty: ${doctor.specialty}`),
+        createElement('p', 'doctor-email', `Email: ${doctor.email}`),
+        createElement('p', 'doctor-availability',
+            `Available: ${formatAvailability(doctor.availableTimes)}`)
+    ];
+
+    infoDiv.append(...elements);
+    return infoDiv;
+}
+
+/**
+ * Creates the actions section based on user role
+ * @param {Object} doctor - Doctor data
+ * @param {string} role - User role
+ * @returns {HTMLElement} Actions section element
+ */
+function createActionsSection(doctor, role) {
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'card-actions';
+
+    switch (role) {
+        case 'admin':
+            actionsDiv.appendChild(createDeleteButton(doctor));
+            break;
+        case 'loggedPatient':
+            actionsDiv.appendChild(createBookButton(doctor, true));
+            break;
+        case 'patient':
+            actionsDiv.appendChild(createBookButton(doctor, false));
+            break;
+        default:
+            // No actions for guests
+            break;
+    }
+
+    return actionsDiv;
+}
+
+/**
+ * Creates a standardized DOM element
+ * @param {string} tag - Element tag name
+ * @param {string} className - CSS class name
+ * @param {string} text - Text content
+ * @returns {HTMLElement} Created element
+ */
+function createElement(tag, className, text) {
+    const el = document.createElement(tag);
+    el.className = className;
+    el.textContent = text;
+    return el;
+}
+
+/**
+ * Formats availability times for display
+ * @param {string[]} times - Array of time slots
+ * @returns {string} Formatted availability string
+ */
+function formatAvailability(times) {
+    return Array.isArray(times) ? times.join(', ') : 'Not available';
+}
+
+/**
+ * Creates a delete button (admin only)
+ * @param {Object} doctor - Doctor data
+ * @returns {HTMLButtonElement} Configured delete button
+ */
+function createDeleteButton(doctor) {
+    const button = document.createElement('button');
+    button.className = 'btn btn-danger';
+    button.textContent = 'Delete';
+
+    button.addEventListener('click', async () => {
+        if (!confirm(`Permanently delete Dr. ${doctor.name}?`)) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Authentication required');
+
+            await deleteDoctor(doctor.id, token);
+            button.closest('.doctor-card').remove();
+        } catch (error) {
+            console.error('Delete failed:', error.message);
+            alert(`Delete failed: ${error.message}`);
+        }
+    });
+
+    return button;
+}
+
+/**
+ * Creates a book appointment button
+ * @param {Object} doctor - Doctor data
+ * @param {boolean} isLoggedIn - Whether user is authenticated
+ * @returns {HTMLButtonElement} Configured book button
+ */
+function createBookButton(doctor, isLoggedIn) {
+    const button = document.createElement('button');
+    button.className = 'btn btn-primary';
+    button.textContent = 'Book Now';
+
+    button.addEventListener('click', async (event) => {  // Add event parameter
+        if (!isLoggedIn) {
+            alert('Please login to book an appointment');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error('Session expired');
+
+            const patientData = await getPatientData(token);
+            showBookingOverlay(event, doctor, patientData);  // Pass event first
+        } catch (error) {
+            console.error('Booking error:', error.message);
+            alert(`Booking failed: ${error.message}`);
+        }
+    });
+
+    return button;
+}
+
+function showBookingOverlay(e, doctor, patient) {
+  const button = e.target;
+  const rect = button.getBoundingClientRect();
+  console.log(patient.name)
+  console.log(patient)
+  const ripple = document.createElement("div");
+  ripple.classList.add("ripple-overlay");
+  ripple.style.left = `${e.clientX}px`;
+  ripple.style.top = `${e.clientY}px`;
+  document.body.appendChild(ripple);
+
+  setTimeout(() => ripple.classList.add("active"), 50);
+
+  const modalApp = document.createElement("div");
+  modalApp.classList.add("modalApp");
+
+  modalApp.innerHTML = `
+    <span class="close" id="closeModal">&times;</span>
+    <h2>Book Appointment</h2>
+    <input class="input-field" type="text" value="${patient.name}" disabled />
+    <input class="input-field" type="text" value="${doctor.name}" disabled />
+    <input class="input-field" type="text" value="${doctor.specialty}" disabled/>
+    <input class="input-field" type="email" value="${doctor.email}" disabled/>
+    <input class="input-field" type="date" id="appointment-date" />
+    <select class="input-field" id="appointment-time">
+      <option value="">Select time</option>
+      ${doctor.availableTimes.map(t => `<option value="${t}">${t}</option>`).join('')}
+    </select>
+    <button class="confirm-booking">Confirm Booking</button>
+  `;
+
+  document.body.appendChild(modalApp);
+
+  document.getElementById('closeModal').onclick = () => {
+    modalApp.remove();
+    ripple.remove();
+  };
+
+  setTimeout(() => modalApp.classList.add("active"), 600);
+
+  modalApp.querySelector(".confirm-booking").addEventListener("click", async () => {
+    const date = modalApp.querySelector("#appointment-date").value;
+    const time = modalApp.querySelector("#appointment-time").value;
+    const token = localStorage.getItem("token");
+    const startTime = time.split('-')[0];
+    const appointment = {
+      doctor: { id: doctor.id },
+      patient: { id: patient.id },
+      appointmentTime: `${date}T${startTime}:00`,
+      status: 0
+    };
+
+
+    const { success, message } = await bookAppointment(appointment, token);
+
+    if (success) {
+      alert("Appointment Booked successfully");
+      ripple.remove();
+      modalApp.remove();
+    } else {
+      alert("❌ Failed to book an appointment :: " + message);
+    }
+  });
+}
+
+export function renderDoctorCards(doctors) {
+  const contentDiv = document.getElementById("content");
+  contentDiv.innerHTML = "";
+
+  doctors.forEach(doctor => {
+    const card = createDoctorCard(doctor);
+    contentDiv.appendChild(card);
+  });
+
+}
+
 /*
 Import the overlay function for booking appointments from loggedPatient.js
 
@@ -178,20 +281,20 @@ Import the overlay function for booking appointments from loggedPatient.js
         Call API to delete the doctor
         Show result and remove card if successful
       Add delete button to actions container
-   
+
     === PATIENT (NOT LOGGED-IN) ROLE ACTIONS ===
       Create a book now button
       Alert patient to log in before booking
       Add button to actions container
-  
-    === LOGGED-IN PATIENT ROLE ACTIONS === 
+
+    === LOGGED-IN PATIENT ROLE ACTIONS ===
       Create a book now button
-      Handle booking logic for logged-in patient   
+      Handle booking logic for logged-in patient
         Redirect if token not available
         Fetch patient data with token
         Show booking overlay UI with doctor and patient info
       Add button to actions container
-   
+
   Append doctor info and action buttons to the car
   Return the complete doctor card element
 */

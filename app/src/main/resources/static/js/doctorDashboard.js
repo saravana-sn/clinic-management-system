@@ -74,6 +74,7 @@ async function loadAppointments() {
 
         // Fetch appointments
         const appointments = await getAllAppointments(selectedDate, patientName, token);
+        console.log(appointments)
         
         if (!appointments || appointments.length === 0) {
             showNoAppointmentsMessage();
@@ -91,7 +92,7 @@ async function loadAppointments() {
                 status: appointment.status
             };
             
-            const row = createPatientRow(patient);
+            const row = createPatientRow(patient,appointment.id, appointment.doctor.id);
             tableBody.appendChild(row);
         });
 
@@ -107,7 +108,7 @@ async function loadAppointments() {
 function showNoAppointmentsMessage() {
     const row = document.createElement('tr');
     row.innerHTML = `
-        <td colspan="6" class="text-center">
+        <td colspan="5" class="text-center">
             No appointments found for ${patientName ? `patient "${patientName}"` : 'selected date'}.
         </td>
     `;

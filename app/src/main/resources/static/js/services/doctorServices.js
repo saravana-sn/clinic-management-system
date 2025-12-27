@@ -120,6 +120,7 @@ export async function filterDoctors(name = '', time = '', specialty = '') {
         }
 
         const data = await response.json();
+        console.log("data:", data)
         return data.doctors || [];
     } catch (error) {
         console.error("Failed to filter doctors:", error);

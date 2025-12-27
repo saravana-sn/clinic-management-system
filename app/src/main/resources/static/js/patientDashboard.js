@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function loadDoctorCards() {
   getDoctors()
     .then(doctors => {
-      const contentDiv = document.getElementById("content");
+      const contentDiv = document.getElementById("doctorsContainer");
       contentDiv.innerHTML = "";
 
       doctors.forEach(doctor => {
@@ -61,20 +61,22 @@ function filterDoctorsOnChange() {
 
   filterDoctors(name, time, specialty)
     .then(response => {
-      const doctors = response.doctors;
-      const contentDiv = document.getElementById("content");
+      // If response IS the array, use it. If it's an object with a doctors property, use that.
+      const doctors = Array.isArray(response) ? response : (response.doctors || []);
+
+      const contentDiv = document.getElementById("doctorsContainer");
       contentDiv.innerHTML = "";
 
-      if (doctors.length > 0) {
-        console.log(doctors);
+      if (doctors && doctors.length > 0) {
+        console.log("Doctors found:", doctors);
         doctors.forEach(doctor => {
           const card = createDoctorCard(doctor);
           contentDiv.appendChild(card);
         });
       } else {
-        contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
-        console.log("Nothing");
-      }
+      contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
+      console.log("No doctors returned from server.");
+    }
     })
     .catch(error => {
       console.error("Failed to filter doctors:", error);

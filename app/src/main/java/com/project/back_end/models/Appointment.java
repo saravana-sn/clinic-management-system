@@ -67,6 +67,25 @@ public class Appointment {
     @NotNull
     private int status;
 
+    // Status Constants
+    public static final int STATUS_SCHEDULED = 0;
+    public static final int STATUS_COMPLETED = 1;
+    public static final int STATUS_CANCELLED = 2;
+
+    // Business Logic Methods
+    public boolean isCompleted() {
+        return this.status == STATUS_COMPLETED;
+    }
+
+    public boolean isCancelled() {
+        return this.status == STATUS_CANCELLED;
+    }
+
+    public boolean isUpcoming() {
+        return this.status == STATUS_SCHEDULED &&
+                this.appointmentTime.isAfter(LocalDateTime.now());
+    }
+
 // 6. 'getEndTime' method:
 //    - Type: private LocalDateTime
 //    - Description:
@@ -83,6 +102,7 @@ public class Appointment {
 //    - Description:
 //      - This method extracts only the date part from the appointmentTime field.
 //      - It returns a LocalDate object representing just the date (without the time) of the scheduled appointment.
+    @Transient
     private LocalDate getAppointmentDate(){
         return appointmentTime.toLocalDate();
     }
@@ -92,6 +112,7 @@ public class Appointment {
 //    - Description:
 //      - This method extracts only the time part from the appointmentTime field.
 //      - It returns a LocalTime object representing just the time (without the date) of the scheduled appointment.
+    @Transient
     private LocalTime getAppointmentTimeOnly(){
         return appointmentTime.toLocalTime();
     }

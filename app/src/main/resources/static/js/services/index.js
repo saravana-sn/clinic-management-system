@@ -1,92 +1,118 @@
-import { openModal } from "../components/modals.js"
+import { openModal } from "../components/modals.js";
 import { API_BASE_URL } from "../config/config.js";
 
-const ADMIN_API = API_BASE_URL + '/admin';
-const DOCTOR_API = API_BASE_URL + '/doctor/login'
+// Define the login endpoints
+const ADMIN_API = API_BASE_URL + '/admin/login';
+const DOCTOR_API = API_BASE_URL + '/doctor/login';
 
-// Initialize dashboard when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners();
-});
+// Ensure the DOM is loaded before attaching listeners
+window.onload = function () {
+    const adminBtn = document.getElementById('adminLogin');
+    const doctorBtn = document.getElementById('doctorLogin');
+
+    // Setup Admin button click
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            openModal('adminLogin');
+        });
+    }
+
+    // Setup Doctor button click
+    if (doctorBtn) {
+        doctorBtn.addEventListener('click', () => {
+            openModal('doctorLogin');
+        });
+    }
+};
 
 /**
- * Sets up all event listeners
+ * Global handler for Admin Login
  */
-function setupEventListeners() {
-    // Add Admin button
-    const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) {
-        adminBtn.addEventListener('click', () => openModal('adminLogin'));
-    }
-    // Add Doctor button
-    const doctorBtn = document.getElementById('doctorBtn');
-    if (doctorBtn) {
-        doctorBtn.addEventListener('click', () => openModal('doctorLogin'));
-    }
-}
+window.adminLoginHandler = async function (event) {
+    // Prevent the form from refreshing the page
+    if (event) event.preventDefault();
 
-
-window.adminLoginHandler = async function(event) {
-    event.preventDefault();
     try {
-        const response = await authenticate({
-            username: document.getElementById('adminUsername').value,
-            password: document.getElementById('adminPassword').value
-        }, 'admin');
-        
-        handleLoginSuccess(response, 'admin');
+        // Step 1: Get values from input fields
+        const username = document.getElementById('adminUsername').value;
+        const password = document.getElementById('adminPassword').value;
+
+        // Step 2: Create admin object
+        const admin = { username, password };
+
+        // Step 3: Send POST request
+        const response = await fetch(ADMIN_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(admin)
+        });
+
+        // Step 4: Handle successful response
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userRole', 'admin');
+
+            // This function from render.js handles the role-based view
+            if (typeof selectRole === 'function') {
+                selectRole('admin');
+            }
+        } else {
+            // Step 5: Handle invalid credentials
+            alert("Invalid credentials!");
+        }
     } catch (error) {
-        showError('adminError', error.message);
+        // Step 6: Handle network or server errors
+        console.error("Login Error:", error);
+        alert("Something went wrong. Please try again later.");
     }
 };
 
-window.doctorLoginHandler = async function(event) {
-    event.preventDefault();
+/**
+ * Global handler for Doctor Login
+ */
+window.doctorLoginHandler = async function (event) {
+    if (event) event.preventDefault();
+
     try {
-        const response = await authenticate({
-            identifier: document.getElementById('doctorEmail').value,
-            password: document.getElementById('doctorPassword').value
-        }, 'doctor');
-        
-        handleLoginSuccess(response, 'doctor');
+        // Step 1: Get values from input fields
+        const identifier = document.getElementById('doctorEmail').value;
+        const password = document.getElementById('doctorPassword').value;
+       console.log("doctor", identifier)
+
+        // Step 2: Create doctor object
+        const doctor = { identifier, password };
+
+        // Step 3: Send POST request
+        const response = await fetch(DOCTOR_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(doctor)
+        });
+
+        // Step 4: Handle success
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userRole', 'doctor');
+
+            if (typeof selectRole === 'function') {
+                selectRole('doctor');
+            }
+        } else {
+            // Step 5: Handle failure
+            alert("Invalid credentials!");
+        }
     } catch (error) {
-        showError('doctorError', error.message);
+        // Step 6: Graceful error handling
+        console.error("Doctor Login Error:", error);
+        alert("A server error occurred.");
     }
 };
-
-async function authenticate(credentials, role) {
-    const response = await fetch(API_ENDPOINTS[role], {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': getCSRFToken()
-        },
-        body: JSON.stringify(credentials)
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-    }
-
-    return response;
-}
-
-function handleLoginSuccess(response, role) {
-    response.json().then(data => {
-        if (!data.token) throw new Error('No token received');
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userRole', role);
-
-        // Redirect
-        window.location.href = `/${role}/dashboard?token=${encodeURIComponent(data.token)}`;
-
-        // Immediately clear from URL after loading
-        setTimeout(() => {
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }, 100);
-    });
-}
 
 export function showError(elementId, message) {
     const errorElement = document.getElementById(elementId);
@@ -99,7 +125,7 @@ export function showError(elementId, message) {
     setTimeout(() => {
         errorElement.style.display = 'none';
     }, 5000);
-}
+};
 
 /*
   Import the openModal function to handle showing login popups/modals
